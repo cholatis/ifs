@@ -1,0 +1,1068 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workload Dashboard</title>
+    <script src="/_sdk/element_sdk.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 100%;
+        }
+
+        /* Header Styles */
+        .header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+            transform: translateY(-1px);
+        }
+
+        .weeks-dropdown {
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            background: white;
+            font-size: 0.875rem;
+            color: #475569;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* Resources Sidebar */
+        .resources-sidebar {
+            width: 200px;
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            flex-shrink: 0;
+        }
+
+        .resources-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 600;
+            color: #1e293b;
+            background-color: #f8fafc;
+        }
+
+        .resource-item {
+            padding: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            font-weight: 500;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .resource-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        /* Schedule Grid */
+        .schedule-container {
+            flex: 1;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            grid-template-rows: auto 1fr;
+            min-width: 800px;
+            height: 100%;
+        }
+
+        .weeks-header {
+            display: grid;
+            grid-column: 1 / -1;
+            grid-template-columns: 200px 1fr;
+            gap: 1px;
+            background-color: #e2e8f0;
+            padding: 1px;
+        }
+
+        .resource-header-cell {
+            background: #f8fafc;
+            padding: 0.75rem;
+            text-align: center;
+            font-weight: 600;
+            color: #1e293b;
+            border-bottom: 2px solid #3b82f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .weeks-header-grid {
+            display: grid;
+            gap: 1px;
+        }
+
+        .week-header {
+            background: #f8fafc;
+            padding: 0.75rem;
+            text-align: center;
+            font-weight: 600;
+            color: #1e293b;
+            border-bottom: 2px solid #3b82f6;
+            min-width: 140px;
+        }
+
+        .week-header-month {
+            font-size: 0.875rem;
+            color: #3b82f6;
+            margin-bottom: 0.25rem;
+        }
+
+        .week-header-week {
+            font-size: 0.75rem;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+
+        .week-header-dates {
+            font-size: 0.625rem;
+            color: #64748b;
+            line-height: 1.2;
+        }
+
+        .schedule-rows {
+            display: grid;
+            grid-column: 1 / -1;
+            grid-template-rows: repeat(2, 1fr);
+            gap: 1px;
+            background-color: #e2e8f0;
+            padding: 1px;
+        }
+
+        .schedule-row {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 1px;
+        }
+
+        .resource-name-cell {
+            background: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0.75rem;
+            font-weight: 500;
+            color: #475569;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .schedule-cells-grid {
+            display: grid;
+            gap: 1px;
+        }
+
+        .schedule-cell {
+            background: white;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 80px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .schedule-cell:hover {
+            background-color: #f0f9ff;
+        }
+
+        /* Workload Badges */
+        .workload-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .workload-badge:hover {
+            transform: scale(1.1);
+        }
+
+        .badge-completed {
+            background-color: #3b82f6;
+        }
+
+        .badge-overloaded {
+            background-color: #ef4444;
+        }
+
+        .badge-empty {
+            background-color: #94a3b8;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 1000;
+            margin-bottom: 0.5rem;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 4px solid transparent;
+            border-top-color: #1e293b;
+        }
+
+        .workload-badge:hover .tooltip {
+            opacity: 1;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .header-buttons {
+                justify-content: center;
+            }
+
+            .main-content {
+                flex-direction: column;
+            }
+
+            .resources-sidebar {
+                width: 100%;
+                order: 2;
+            }
+
+            .resources-header {
+                display: none;
+            }
+
+            .resource-item {
+                display: inline-flex;
+                padding: 0.5rem 1rem;
+                margin: 0.25rem;
+                background: white;
+                border: 1px solid #e2e8f0;
+                border-radius: 0.5rem;
+            }
+
+            .schedule-container {
+                order: 1;
+                height: 400px;
+            }
+
+            .btn {
+                font-size: 0.75rem;
+                padding: 0.375rem 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 0.75rem;
+            }
+
+            .header-buttons {
+                gap: 0.5rem;
+            }
+
+            .btn {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.5rem;
+            }
+
+            .workload-badge {
+                width: 32px;
+                height: 32px;
+                font-size: 0.75rem;
+            }
+
+            .schedule-cell {
+                padding: 1rem;
+                min-height: 60px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    <style>
+        @view-transition {
+            navigation: auto;
+        }
+    </style>
+    <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+    <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+</head>
+
+<body>
+    <div class="dashboard-container"><!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 id="dashboardTitle" class="header-title">Workload Dashboard</h1>
+                <div class="header-buttons"><button id="newItemBtn" class="btn btn-primary"
+                        onclick="openNewItemModal()"> <span>➕</span> New Item </button> <button id="addWidgetBtn"
+                        class="btn btn-secondary" onclick="openAddWidgetModal()"> <span>📊</span> Add Widget </button>
+                    <button class="btn btn-secondary" onclick="openSearchModal()"> <span>🔍</span> Search </button>
+                    <button class="btn btn-secondary" onclick="openPersonModal()"> <span>👤</span> Person </button>
+                    <button class="btn btn-secondary" onclick="toggleFilter()"> <span>🔧</span> Filter </button> <button
+                        class="btn btn-secondary" onclick="goToToday()"> <span>📅</span> Today </button> <select
+                        class="weeks-dropdown" id="weeksDropdown" onchange="updateWeeksView()">
+                        <option value="8">8 Weeks</option>
+                        <option value="12" selected>12 Weeks</option>
+                        <option value="16">16 Weeks</option>
+                        <option value="20">20 Weeks</option>
+                    </select>
+                </div>
+            </div>
+        </header><!-- Main Content -->
+        <main class="main-content"><!-- Schedule Grid -->
+            <div class="schedule-container">
+                <div class="schedule-grid">
+                    <div class="weeks-header" id="weeksHeader"><!-- Week headers will be generated here -->
+                    </div>
+                    <div class="schedule-rows" id="scheduleRows"><!-- Schedule rows will be generated here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div><!-- New Item Modal -->
+    <div id="newItemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                Add New Workload Item
+            </div>
+            <form id="newItemForm" onsubmit="addNewItem(event)">
+                <div class="form-group"><label class="form-label">Resource</label> <select class="form-select"
+                        id="itemResource" required>
+                        <option value="">Select Resource</option>
+                        <option value="Mr A">Mr A</option>
+                        <option value="Mr B">Mr B</option>
+                    </select>
+                </div>
+                <div class="form-group"><label class="form-label">Week</label> <select class="form-select" id="itemWeek"
+                        required>
+                        <option value="">Select Week</option>
+                    </select>
+                </div>
+                <div class="form-group"><label class="form-label">Task Count</label> <input type="number"
+                        class="form-input" id="itemCount" min="1" max="3" required placeholder="1-3 tasks">
+                </div>
+                <div class="form-group"><label class="form-label">Status</label> <select class="form-select"
+                        id="itemStatus" required>
+                        <option value="">Select Status</option>
+                        <option value="completed">Completed</option>
+                        <option value="overloaded">Overloaded</option>
+                        <option value="empty">Empty Slot</option>
+                    </select>
+                </div>
+                <div class="modal-actions"><button type="button" class="btn btn-secondary"
+                        onclick="closeModal('newItemModal')">Cancel</button> <button type="submit"
+                        class="btn btn-primary">Add Item</button>
+                </div>
+            </form>
+        </div>
+    </div><!-- Add Widget Modal -->
+    <div id="addWidgetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                Add Dashboard Widget
+            </div>
+            <div style="display: grid; gap: 1rem;"><button class="btn btn-secondary" onclick="addWidget('stats')"
+                    style="justify-content: flex-start;"> 📊 Workload Statistics </button> <button
+                    class="btn btn-secondary" onclick="addWidget('calendar')" style="justify-content: flex-start;"> 📅
+                    Calendar View </button> <button class="btn btn-secondary" onclick="addWidget('team')"
+                    style="justify-content: flex-start;"> 👥 Team Overview </button>
+            </div>
+            <div class="modal-actions"><button type="button" class="btn btn-secondary"
+                    onclick="closeModal('addWidgetModal')">Close</button>
+            </div>
+        </div>
+    </div><!-- Search Modal -->
+    <div id="searchModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                Search Workloads
+            </div>
+            <div class="form-group"><input type="text" class="form-input" id="searchInput"
+                    placeholder="Search by resource, week, or status...">
+            </div>
+            <div id="searchResults" style="max-height: 300px; overflow-y: auto; margin: 1rem 0;">
+                <!-- Search results will appear here -->
+            </div>
+            <div class="modal-actions"><button type="button" class="btn btn-primary"
+                    onclick="performSearch()">Search</button> <button type="button" class="btn btn-secondary"
+                    onclick="closeModal('searchModal')">Close</button>
+            </div>
+        </div>
+    </div><!-- Person Modal -->
+    <div id="personModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                Manage Resources
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <h3 style="margin-bottom: 0.5rem;">Current Resources:</h3>
+                <div id="resourcesList">
+                    <div style="padding: 0.5rem; background: #f8fafc; border-radius: 0.5rem; margin-bottom: 0.5rem;">
+                        👤 Mr A
+                    </div>
+                    <div style="padding: 0.5rem; background: #f8fafc; border-radius: 0.5rem; margin-bottom: 0.5rem;">
+                        👤 Mr B
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions"><button type="button" class="btn btn-secondary"
+                    onclick="closeModal('personModal')">Close</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Default configuration
+        const defaultConfig = {
+            dashboard_title: "Workload Dashboard",
+            new_item_button: "➕ New Item",
+            add_widget_button: "📊 Add Widget"
+        };
+
+        // Application state
+        let workloadData = [];
+        let currentWeeksCount = 12;
+        let filterActive = false;
+
+        // Element SDK configuration
+        const elementConfig = {
+            defaultConfig: defaultConfig,
+            onConfigChange: async (config) => {
+                const dashboardTitle = document.getElementById('dashboardTitle');
+                const newItemBtn = document.getElementById('newItemBtn');
+                const addWidgetBtn = document.getElementById('addWidgetBtn');
+
+                if (dashboardTitle) {
+                    dashboardTitle.textContent = config.dashboard_title || defaultConfig.dashboard_title;
+                }
+                if (newItemBtn) {
+                    const span = newItemBtn.querySelector('span');
+                    newItemBtn.innerHTML = `${span.outerHTML} ${config.new_item_button?.replace('➕ ', '') || defaultConfig.new_item_button.replace('➕ ', '')}`;
+                }
+                if (addWidgetBtn) {
+                    const span = addWidgetBtn.querySelector('span');
+                    addWidgetBtn.innerHTML = `${span.outerHTML} ${config.add_widget_button?.replace('📊 ', '') || defaultConfig.add_widget_button.replace('📊 ', '')}`;
+                }
+            },
+            mapToCapabilities: (config) => ({
+                recolorables: [],
+                borderables: [],
+                fontEditable: undefined,
+                fontSizeable: undefined
+            }),
+            mapToEditPanelValues: (config) => new Map([
+                ["dashboard_title", config.dashboard_title || defaultConfig.dashboard_title],
+                ["new_item_button", config.new_item_button || defaultConfig.new_item_button],
+                ["add_widget_button", config.add_widget_button || defaultConfig.add_widget_button]
+            ])
+        };
+
+        // Initialize SDK
+        async function initializeApp() {
+            try {
+                if (window.elementSdk) {
+                    await window.elementSdk.init(elementConfig);
+                }
+
+                // Initialize the dashboard
+                generateScheduleGrid();
+                populateWeekOptions();
+                loadSampleData();
+            } catch (error) {
+                console.error("Failed to initialize app:", error);
+            }
+        }
+
+        // Generate week numbers starting from current week
+        function generateWeeks(count = 12) {
+            const weeks = [];
+            const currentDate = new Date();
+
+            for (let i = 0; i < count; i++) {
+                const weekStartDate = new Date(currentDate);
+                weekStartDate.setDate(currentDate.getDate() + (i * 7));
+
+                // Get start of week (Monday)
+                const dayOfWeek = weekStartDate.getDay();
+                const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+                const monday = new Date(weekStartDate);
+                monday.setDate(weekStartDate.getDate() + mondayOffset);
+
+                // Get end of week (Sunday)
+                const sunday = new Date(monday);
+                sunday.setDate(monday.getDate() + 6);
+
+                const weekNumber = getWeekNumber(monday);
+
+                weeks.push({
+                    number: weekNumber,
+                    label: `W${weekNumber}`,
+                    startDate: monday,
+                    endDate: sunday,
+                    monthYear: monday.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+                });
+            }
+
+            return weeks;
+        }
+
+        function getWeekNumber(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        // Generate the schedule grid
+        function generateScheduleGrid() {
+            const weeks = generateWeeks(currentWeeksCount);
+            const weeksHeader = document.getElementById('weeksHeader');
+            const scheduleRows = document.getElementById('scheduleRows');
+
+            // Clear existing content
+            weeksHeader.innerHTML = '';
+            scheduleRows.innerHTML = '';
+
+            // Update grid columns for week headers
+            const gridColumns = `repeat(${weeks.length}, minmax(140px, 1fr))`;
+
+            // Create resource header cell
+            const resourceHeaderCell = document.createElement('div');
+            resourceHeaderCell.className = 'resource-header-cell';
+            resourceHeaderCell.textContent = 'Resources';
+            weeksHeader.appendChild(resourceHeaderCell);
+
+            // Create weeks header grid container
+            const weeksHeaderGrid = document.createElement('div');
+            weeksHeaderGrid.className = 'weeks-header-grid';
+            weeksHeaderGrid.style.gridTemplateColumns = gridColumns;
+
+            // Generate week headers
+            weeks.forEach(week => {
+                const headerCell = document.createElement('div');
+                headerCell.className = 'week-header';
+
+                const monthDiv = document.createElement('div');
+                monthDiv.className = 'week-header-month';
+                monthDiv.textContent = week.monthYear;
+
+                const weekDiv = document.createElement('div');
+                weekDiv.className = 'week-header-week';
+                weekDiv.textContent = week.label;
+
+                const datesDiv = document.createElement('div');
+                datesDiv.className = 'week-header-dates';
+                const startDate = week.startDate.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+                const endDate = week.endDate.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+                datesDiv.textContent = `${startDate} - ${endDate}`;
+
+                headerCell.appendChild(monthDiv);
+                headerCell.appendChild(weekDiv);
+                headerCell.appendChild(datesDiv);
+
+                weeksHeaderGrid.appendChild(headerCell);
+            });
+
+            weeksHeader.appendChild(weeksHeaderGrid);
+
+            // Generate resource rows
+            const resources = ['Mr A', 'Mr B'];
+            resources.forEach(resource => {
+                const row = document.createElement('div');
+                row.className = 'schedule-row';
+
+                // Create resource name cell
+                const resourceNameCell = document.createElement('div');
+                resourceNameCell.className = 'resource-name-cell';
+
+                const resourceAvatar = document.createElement('div');
+                resourceAvatar.className = 'resource-avatar';
+                resourceAvatar.textContent = resource.charAt(3); // Get 'A' or 'B'
+
+                const resourceName = document.createElement('span');
+                resourceName.textContent = resource;
+
+                resourceNameCell.appendChild(resourceAvatar);
+                resourceNameCell.appendChild(resourceName);
+                row.appendChild(resourceNameCell);
+
+                // Create schedule cells grid
+                const scheduleCellsGrid = document.createElement('div');
+                scheduleCellsGrid.className = 'schedule-cells-grid';
+                scheduleCellsGrid.style.gridTemplateColumns = gridColumns;
+
+                weeks.forEach(week => {
+                    const cell = document.createElement('div');
+                    cell.className = 'schedule-cell';
+                    cell.onclick = () => openQuickAdd(resource, week);
+
+                    // Find workload data for this cell
+                    const workload = findWorkload(resource, week.number);
+                    if (workload) {
+                        const badge = createWorkloadBadge(workload);
+                        cell.appendChild(badge);
+                    }
+
+                    scheduleCellsGrid.appendChild(cell);
+                });
+
+                row.appendChild(scheduleCellsGrid);
+                scheduleRows.appendChild(row);
+            });
+        }
+
+        // Create workload badge
+        function createWorkloadBadge(workload) {
+            const badge = document.createElement('div');
+            badge.className = `workload-badge badge-${workload.status}`;
+            badge.textContent = workload.count;
+
+            const tooltip = document.createElement('div');
+            tooltip.className = 'tooltip';
+            tooltip.textContent = `${workload.resource} - W${workload.week}: ${workload.count} tasks (${workload.status})`;
+            badge.appendChild(tooltip);
+
+            badge.onclick = (e) => {
+                e.stopPropagation();
+                editWorkload(workload);
+            };
+
+            return badge;
+        }
+
+        // Find workload data
+        function findWorkload(resource, week) {
+            return workloadData.find(item =>
+                item.resource === resource && item.week === week
+            );
+        }
+
+        // Load sample data
+        function loadSampleData() {
+            const weeks = generateWeeks(currentWeeksCount);
+            workloadData = [
+                { id: 1, resource: 'Mr A', week: weeks[0].number, count: 2, status: 'completed' },
+                { id: 2, resource: 'Mr A', week: weeks[1].number, count: 3, status: 'overloaded' },
+                { id: 3, resource: 'Mr A', week: weeks[3].number, count: 1, status: 'empty' },
+                { id: 4, resource: 'Mr B', week: weeks[0].number, count: 1, status: 'completed' },
+                { id: 5, resource: 'Mr B', week: weeks[2].number, count: 3, status: 'overloaded' },
+                { id: 6, resource: 'Mr B', week: weeks[4].number, count: 2, status: 'completed' }
+            ];
+            generateScheduleGrid();
+        }
+
+        // Populate week options in modal
+        function populateWeekOptions() {
+            const weeks = generateWeeks(currentWeeksCount);
+            const select = document.getElementById('itemWeek');
+            select.innerHTML = '<option value="">Select Week</option>';
+
+            weeks.forEach(week => {
+                const option = document.createElement('option');
+                option.value = week.number;
+                option.textContent = week.label;
+                select.appendChild(option);
+            });
+        }
+
+        // Modal functions
+        function openNewItemModal() {
+            document.getElementById('newItemModal').style.display = 'flex';
+        }
+
+        function openAddWidgetModal() {
+            document.getElementById('addWidgetModal').style.display = 'flex';
+        }
+
+        function openSearchModal() {
+            document.getElementById('searchModal').style.display = 'flex';
+        }
+
+        function openPersonModal() {
+            document.getElementById('personModal').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function openQuickAdd(resource, week) {
+            document.getElementById('itemResource').value = resource;
+            document.getElementById('itemWeek').value = week.number;
+            openNewItemModal();
+        }
+
+        // Add new workload item
+        function addNewItem(event) {
+            event.preventDefault();
+
+            const resource = document.getElementById('itemResource').value;
+            const week = parseInt(document.getElementById('itemWeek').value);
+            const count = parseInt(document.getElementById('itemCount').value);
+            const status = document.getElementById('itemStatus').value;
+
+            // Check if item already exists
+            const existingIndex = workloadData.findIndex(item =>
+                item.resource === resource && item.week === week
+            );
+
+            const newItem = {
+                id: Date.now(),
+                resource,
+                week,
+                count,
+                status
+            };
+
+            if (existingIndex >= 0) {
+                workloadData[existingIndex] = newItem;
+            } else {
+                workloadData.push(newItem);
+            }
+
+            generateScheduleGrid();
+            closeModal('newItemModal');
+            document.getElementById('newItemForm').reset();
+
+            showNotification('Workload item added successfully!');
+        }
+
+        // Edit workload
+        function editWorkload(workload) {
+            document.getElementById('itemResource').value = workload.resource;
+            document.getElementById('itemWeek').value = workload.week;
+            document.getElementById('itemCount').value = workload.count;
+            document.getElementById('itemStatus').value = workload.status;
+            openNewItemModal();
+        }
+
+        // Update weeks view
+        function updateWeeksView() {
+            currentWeeksCount = parseInt(document.getElementById('weeksDropdown').value);
+            generateScheduleGrid();
+            populateWeekOptions();
+        }
+
+        // Filter toggle
+        function toggleFilter() {
+            filterActive = !filterActive;
+            const btn = event.target;
+            if (filterActive) {
+                btn.style.backgroundColor = '#3b82f6';
+                btn.style.color = 'white';
+                showNotification('Filter activated');
+            } else {
+                btn.style.backgroundColor = '#f1f5f9';
+                btn.style.color = '#475569';
+                showNotification('Filter deactivated');
+            }
+        }
+
+        // Go to today
+        function goToToday() {
+            generateScheduleGrid();
+            showNotification('Jumped to current week');
+        }
+
+        // Add widget
+        function addWidget(type) {
+            const widgetNames = {
+                stats: 'Workload Statistics',
+                calendar: 'Calendar View',
+                team: 'Team Overview'
+            };
+
+            showNotification(`${widgetNames[type]} widget added!`);
+            closeModal('addWidgetModal');
+        }
+
+        // Search functionality
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const results = workloadData.filter(item =>
+                item.resource.toLowerCase().includes(query) ||
+                item.status.toLowerCase().includes(query) ||
+                `w${item.week}`.includes(query)
+            );
+
+            const resultsContainer = document.getElementById('searchResults');
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 2rem;">No results found</p>';
+            } else {
+                resultsContainer.innerHTML = results.map(item => `
+                    <div style="padding: 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; margin-bottom: 0.5rem;">
+                        <strong>${item.resource}</strong> - W${item.week}<br>
+                        <small style="color: #6b7280;">${item.count} tasks (${item.status})</small>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Show notification
+        function showNotification(message) {
+            // Create a simple toast notification
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #3b82f6;
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 0.5rem;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 1001;
+                animation: slideIn 0.3s ease;
+            `;
+            toast.textContent = message;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        });
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize the application
+        initializeApp();
+    </script>
+    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9990ec3be0073db0',t:'MTc2MjIyNTg3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+</body>
+
+</html>

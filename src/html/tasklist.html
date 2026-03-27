@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workload Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .task-card {
+            transition: all 0.3s ease;
+        }
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .priority-high { border-left: 4px solid #ef4444; }
+        .priority-medium { border-left: 4px solid #f59e0b; }
+        .priority-low { border-left: 4px solid #10b981; }
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-full">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">📊 Workload Management</h1>
+                    <p class="text-gray-600 mt-2">จัดการงานและติดตามความคืบหน้าอย่างมีประสิทธิภาพ</p>
+                </div>
+                <button onclick="showAddTaskModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                    ➕ เพิ่มงานใหม่
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Dashboard -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center">
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <span class="text-2xl">📋</span>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-600 text-sm">งานทั้งหมด</p>
+                        <p class="text-2xl font-bold text-gray-800" id="totalTasks">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center">
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <span class="text-2xl">✅</span>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-600 text-sm">เสร็จแล้ว</p>
+                        <p class="text-2xl font-bold text-green-600" id="completedTasks">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center">
+                    <div class="bg-yellow-100 p-3 rounded-full">
+                        <span class="text-2xl">⏳</span>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-600 text-sm">กำลังดำเนินการ</p>
+                        <p class="text-2xl font-bold text-yellow-600" id="inProgressTasks">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center">
+                    <div class="bg-red-100 p-3 rounded-full">
+                        <span class="text-2xl">🔥</span>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-600 text-sm">ความสำคัญสูง</p>
+                        <p class="text-2xl font-bold text-red-600" id="highPriorityTasks">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter and Sort -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex flex-wrap gap-4 items-center">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">กรองตามสถานะ</label>
+                    <select id="statusFilter" onchange="filterTasks()" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="all">ทั้งหมด</option>
+                        <option value="todo">รอดำเนินการ</option>
+                        <option value="in-progress">กำลังดำเนินการ</option>
+                        <option value="completed">เสร็จแล้ว</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">กรองตามความสำคัญ</label>
+                    <select id="priorityFilter" onchange="filterTasks()" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="all">ทั้งหมด</option>
+                        <option value="high">สูง</option>
+                        <option value="medium">ปานกลาง</option>
+                        <option value="low">ต่ำ</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">เรียงตาม</label>
+                    <select id="sortBy" onchange="sortTasks()" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="created">วันที่สร้าง</option>
+                        <option value="priority">ความสำคัญ</option>
+                        <option value="deadline">กำหนดส่ง</option>
+                        <option value="progress">ความคืบหน้า</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tasks List -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-6">รายการงาน</h2>
+            <div id="tasksList" class="space-y-4">
+                <!-- Tasks will be rendered here -->
+            </div>
+            <div id="emptyState" class="text-center py-12 hidden">
+                <span class="text-6xl">📝</span>
+                <h3 class="text-xl font-medium text-gray-600 mt-4">ยังไม่มีงานในระบบ</h3>
+                <p class="text-gray-500 mt-2">เริ่มต้นด้วยการเพิ่มงานใหม่</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Task Modal -->
+    <div id="addTaskModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl p-8 m-4 w-full max-w-md">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">เพิ่มงานใหม่</h3>
+            <form id="addTaskForm" onsubmit="addTask(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">ชื่องาน</label>
+                    <input type="text" id="taskTitle" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="ระบุชื่องาน">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">รายละเอียด</label>
+                    <textarea id="taskDescription" rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="รายละเอียดงาน (ไม่บังคับ)"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">ความสำคัญ</label>
+                    <select id="taskPriority" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="low">ต่ำ</option>
+                        <option value="medium" selected>ปานกลาง</option>
+                        <option value="high">สูง</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">กำหนดส่ง</label>
+                    <input type="date" id="taskDeadline" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">งานย่อย (Subtasks)</label>
+                    <div id="subtasksList" class="space-y-2 mb-3">
+                        <!-- Subtasks will be added here -->
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="newSubtask" placeholder="เพิ่มงานย่อย..." onkeypress="if(event.key==='Enter'){event.preventDefault();addSubtask();}" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <button type="button" onclick="addSubtask()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                            ➕
+                        </button>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" onclick="hideAddTaskModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg font-medium transition-colors">
+                        ยกเลิก
+                    </button>
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors">
+                        เพิ่มงาน
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let tasks = [];
+        let taskIdCounter = 1;
+        let subtaskIdCounter = 1;
+        let currentSubtasks = [];
+
+        // Initialize with sample data
+        function initializeSampleData() {
+            const sampleTasks = [
+                {
+                    id: taskIdCounter++,
+                    title: "ออกแบบ UI/UX สำหรับแอปพลิเคชันใหม่",
+                    description: "สร้าง wireframe และ mockup สำหรับแอปพลิเคชันมือถือ",
+                    priority: "high",
+                    status: "in-progress",
+                    progress: 0,
+                    deadline: "2024-01-15",
+                    createdAt: new Date("2024-01-01"),
+                    subtasks: [
+                        { id: subtaskIdCounter++, title: "วิเคราะห์ความต้องการผู้ใช้", completed: true },
+                        { id: subtaskIdCounter++, title: "สร้าง User Journey Map", completed: true },
+                        { id: subtaskIdCounter++, title: "ออกแบบ Wireframe", completed: true },
+                        { id: subtaskIdCounter++, title: "สร้าง Mockup หน้าหลัก", completed: false },
+                        { id: subtaskIdCounter++, title: "ออกแบบ Icon และ Graphics", completed: false }
+                    ]
+                },
+                {
+                    id: taskIdCounter++,
+                    title: "เขียนเอกสารคู่มือการใช้งาน",
+                    description: "จัดทำคู่มือการใช้งานระบบสำหรับผู้ใช้งาน",
+                    priority: "medium",
+                    status: "todo",
+                    progress: 0,
+                    deadline: "2024-01-20",
+                    createdAt: new Date("2024-01-02"),
+                    subtasks: [
+                        { id: subtaskIdCounter++, title: "เขียนบทนำและภาพรวม", completed: false },
+                        { id: subtaskIdCounter++, title: "จัดทำคู่มือการติดตั้ง", completed: false },
+                        { id: subtaskIdCounter++, title: "เขียนคู่มือการใช้งานพื้นฐาน", completed: false },
+                        { id: subtaskIdCounter++, title: "สร้าง FAQ", completed: false }
+                    ]
+                },
+                {
+                    id: taskIdCounter++,
+                    title: "ทดสอบระบบและแก้ไข bug",
+                    description: "ทำการทดสอบและแก้ไขปัญหาที่พบ",
+                    priority: "high",
+                    status: "todo",
+                    progress: 0,
+                    deadline: "2024-01-18",
+                    createdAt: new Date("2024-01-03"),
+                    subtasks: [
+                        { id: subtaskIdCounter++, title: "ทดสอบ Unit Testing", completed: false },
+                        { id: subtaskIdCounter++, title: "ทดสอบ Integration Testing", completed: false },
+                        { id: subtaskIdCounter++, title: "ทดสอบ User Acceptance", completed: false }
+                    ]
+                }
+            ];
+            
+            // Calculate initial progress for each task
+            tasks.forEach(task => {
+                task.progress = calculateProgress(task.subtasks);
+                updateTaskStatusFromProgress(task);
+            });
+        }
+
+        function calculateProgress(subtasks) {
+            if (!subtasks || subtasks.length === 0) return 0;
+            const completed = subtasks.filter(st => st.completed).length;
+            return Math.round((completed / subtasks.length) * 100);
+        }
+
+        function updateTaskStatusFromProgress(task) {
+            if (task.progress === 100) {
+                task.status = 'completed';
+            } else if (task.progress > 0) {
+                task.status = 'in-progress';
+            } else {
+                task.status = 'todo';
+            }
+        }
+
+        function addSubtask() {
+            const input = document.getElementById('newSubtask');
+            const title = input.value.trim();
+            
+            if (title) {
+                currentSubtasks.push({
+                    id: subtaskIdCounter++,
+                    title: title,
+                    completed: false
+                });
+                input.value = '';
+                renderSubtasks();
+            }
+        }
+
+        function removeSubtask(subtaskId) {
+            currentSubtasks = currentSubtasks.filter(st => st.id !== subtaskId);
+            renderSubtasks();
+        }
+
+        function renderSubtasks() {
+            const container = document.getElementById('subtasksList');
+            container.innerHTML = currentSubtasks.map(subtask => `
+                <div class="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                    <span class="text-sm flex-1">${subtask.title}</span>
+                    <button type="button" onclick="removeSubtask(${subtask.id})" class="text-red-500 hover:text-red-700 text-sm">
+                        ✕
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function toggleSubtask(taskId, subtaskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                const subtask = task.subtasks.find(st => st.id === subtaskId);
+                if (subtask) {
+                    subtask.completed = !subtask.completed;
+                    task.progress = calculateProgress(task.subtasks);
+                    updateTaskStatusFromProgress(task);
+                    renderTasks();
+                    updateStats();
+                }
+            }
+        }
+
+        function showAddTaskModal() {
+            currentSubtasks = [];
+            renderSubtasks();
+            document.getElementById('addTaskModal').classList.remove('hidden');
+            document.getElementById('addTaskModal').classList.add('flex');
+        }
+
+        function hideAddTaskModal() {
+            document.getElementById('addTaskModal').classList.add('hidden');
+            document.getElementById('addTaskModal').classList.remove('flex');
+            document.getElementById('addTaskForm').reset();
+        }
+
+        function addTask(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById('taskTitle').value;
+            const description = document.getElementById('taskDescription').value;
+            const priority = document.getElementById('taskPriority').value;
+            const deadline = document.getElementById('taskDeadline').value;
+
+            const newTask = {
+                id: taskIdCounter++,
+                title,
+                description,
+                priority,
+                status: 'todo',
+                progress: 0,
+                deadline,
+                createdAt: new Date(),
+                subtasks: [...currentSubtasks]
+            };
+
+            // Calculate initial progress if there are subtasks
+            if (newTask.subtasks.length > 0) {
+                newTask.progress = calculateProgress(newTask.subtasks);
+                updateTaskStatusFromProgress(newTask);
+            }
+
+            tasks.push(newTask);
+            hideAddTaskModal();
+            renderTasks();
+            updateStats();
+        }
+
+        function updateTaskStatus(taskId, newStatus) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                task.status = newStatus;
+                if (newStatus === 'completed') {
+                    task.progress = 100;
+                }
+                renderTasks();
+                updateStats();
+            }
+        }
+
+
+
+        function deleteTask(taskId) {
+            // Create inline confirmation
+            const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+            const deleteButton = taskElement.querySelector('.delete-btn');
+            const originalContent = deleteButton.innerHTML;
+            
+            deleteButton.innerHTML = 'ยืนยันลบ?';
+            deleteButton.classList.remove('bg-red-100', 'hover:bg-red-200', 'text-red-600');
+            deleteButton.classList.add('bg-red-600', 'text-white');
+            
+            // Add cancel option
+            const cancelBtn = document.createElement('button');
+            cancelBtn.innerHTML = 'ยกเลิก';
+            cancelBtn.className = 'ml-2 bg-gray-300 hover:bg-gray-400 text-gray-700 px-3 py-1 rounded text-sm transition-colors';
+            cancelBtn.onclick = () => {
+                deleteButton.innerHTML = originalContent;
+                deleteButton.classList.add('bg-red-100', 'hover:bg-red-200', 'text-red-600');
+                deleteButton.classList.remove('bg-red-600', 'text-white');
+                cancelBtn.remove();
+                deleteButton.onclick = () => deleteTask(taskId);
+            };
+            
+            deleteButton.parentNode.appendChild(cancelBtn);
+            deleteButton.onclick = () => {
+                tasks = tasks.filter(t => t.id !== taskId);
+                renderTasks();
+                updateStats();
+            };
+        }
+
+        function getPriorityIcon(priority) {
+            switch(priority) {
+                case 'high': return '🔴';
+                case 'medium': return '🟡';
+                case 'low': return '🟢';
+                default: return '⚪';
+            }
+        }
+
+        function getPriorityText(priority) {
+            switch(priority) {
+                case 'high': return 'สูง';
+                case 'medium': return 'ปานกลาง';
+                case 'low': return 'ต่ำ';
+                default: return '';
+            }
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'todo': return 'รอดำเนินการ';
+                case 'in-progress': return 'กำลังดำเนินการ';
+                case 'completed': return 'เสร็จแล้ว';
+                default: return '';
+            }
+        }
+
+        function getStatusColor(status) {
+            switch(status) {
+                case 'todo': return 'bg-gray-100 text-gray-700';
+                case 'in-progress': return 'bg-yellow-100 text-yellow-700';
+                case 'completed': return 'bg-green-100 text-green-700';
+                default: return 'bg-gray-100 text-gray-700';
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('th-TH');
+        }
+
+        function isOverdue(deadline) {
+            if (!deadline) return false;
+            return new Date(deadline) < new Date() && new Date(deadline).toDateString() !== new Date().toDateString();
+        }
+
+        function renderTasks() {
+            const tasksList = document.getElementById('tasksList');
+            const emptyState = document.getElementById('emptyState');
+            
+            let filteredTasks = getFilteredTasks();
+            
+            if (filteredTasks.length === 0) {
+                tasksList.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+            
+            tasksList.innerHTML = filteredTasks.map(task => `
+                <div class="task-card bg-gray-50 rounded-lg p-6 priority-${task.priority} fade-in" data-task-id="${task.id}">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-lg">${getPriorityIcon(task.priority)}</span>
+                                <h3 class="text-lg font-semibold text-gray-800">${task.title}</h3>
+                                ${isOverdue(task.deadline) ? '<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">เกินกำหนด</span>' : ''}
+                            </div>
+                            ${task.description ? `<p class="text-gray-600 mb-3">${task.description}</p>` : ''}
+                            <div class="flex flex-wrap gap-2 text-sm">
+                                <span class="px-2 py-1 rounded-full ${getStatusColor(task.status)}">${getStatusText(task.status)}</span>
+                                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full">ความสำคัญ: ${getPriorityText(task.priority)}</span>
+                                ${task.deadline ? `<span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full">📅 ${formatDate(task.deadline)}</span>` : ''}
+                                ${task.subtasks && task.subtasks.length > 0 ? `<span class="px-2 py-1 bg-green-100 text-green-700 rounded-full">📝 ${task.subtasks.filter(st => st.completed).length}/${task.subtasks.length} งานย่อย</span>` : ''}
+                            </div>
+                        </div>
+                        <button onclick="deleteTask(${task.id})" class="delete-btn bg-red-100 hover:bg-red-200 text-red-600 px-3 py-1 rounded text-sm transition-colors">
+                            🗑️ ลบ
+                        </button>
+                    </div>
+                    
+                    ${task.subtasks && task.subtasks.length > 0 ? `
+                    <div class="mb-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">งานย่อย (Subtasks)</h4>
+                        <div class="space-y-2 max-h-32 overflow-y-auto">
+                            ${task.subtasks.map(subtask => `
+                                <label class="flex items-center gap-2 p-2 bg-white rounded border cursor-pointer hover:bg-gray-50 transition-colors">
+                                    <input type="checkbox" ${subtask.completed ? 'checked' : ''} 
+                                           onchange="toggleSubtask(${task.id}, ${subtask.id})"
+                                           class="rounded text-blue-600 focus:ring-blue-500">
+                                    <span class="text-sm flex-1 ${subtask.completed ? 'line-through text-gray-500' : 'text-gray-700'}">${subtask.title}</span>
+                                    ${subtask.completed ? '<span class="text-green-500 text-sm">✓</span>' : ''}
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-gray-700">ความคืบหน้า ${task.subtasks && task.subtasks.length > 0 ? '(คำนวณจาก Subtasks)' : ''}</span>
+                            <span class="text-sm font-medium text-gray-700">${task.progress}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="progress-bar bg-blue-600 h-2 rounded-full" style="width: ${task.progress}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <select onchange="updateTaskStatus(${task.id}, this.value)" 
+                                class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="todo" ${task.status === 'todo' ? 'selected' : ''}>รอดำเนินการ</option>
+                            <option value="in-progress" ${task.status === 'in-progress' ? 'selected' : ''}>กำลังดำเนินการ</option>
+                            <option value="completed" ${task.status === 'completed' ? 'selected' : ''}>เสร็จแล้ว</option>
+                        </select>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getFilteredTasks() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const priorityFilter = document.getElementById('priorityFilter').value;
+            
+            let filtered = tasks;
+            
+            if (statusFilter !== 'all') {
+                filtered = filtered.filter(task => task.status === statusFilter);
+            }
+            
+            if (priorityFilter !== 'all') {
+                filtered = filtered.filter(task => task.priority === priorityFilter);
+            }
+            
+            return getSortedTasks(filtered);
+        }
+
+        function getSortedTasks(tasksToSort) {
+            const sortBy = document.getElementById('sortBy').value;
+            
+            return [...tasksToSort].sort((a, b) => {
+                switch(sortBy) {
+                    case 'priority':
+                        const priorityOrder = { high: 3, medium: 2, low: 1 };
+                        return priorityOrder[b.priority] - priorityOrder[a.priority];
+                    case 'deadline':
+                        if (!a.deadline && !b.deadline) return 0;
+                        if (!a.deadline) return 1;
+                        if (!b.deadline) return -1;
+                        return new Date(a.deadline) - new Date(b.deadline);
+                    case 'progress':
+                        return b.progress - a.progress;
+                    case 'created':
+                    default:
+                        return b.createdAt - a.createdAt;
+                }
+            });
+        }
+
+        function filterTasks() {
+            renderTasks();
+        }
+
+        function sortTasks() {
+            renderTasks();
+        }
+
+        function updateStats() {
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.status === 'completed').length;
+            const inProgress = tasks.filter(t => t.status === 'in-progress').length;
+            const highPriority = tasks.filter(t => t.priority === 'high').length;
+            
+            document.getElementById('totalTasks').textContent = total;
+            document.getElementById('completedTasks').textContent = completed;
+            document.getElementById('inProgressTasks').textContent = inProgress;
+            document.getElementById('highPriorityTasks').textContent = highPriority;
+        }
+
+        // Initialize the application
+        initializeSampleData();
+        renderTasks();
+        updateStats();
+
+        // Close modal when clicking outside
+        document.getElementById('addTaskModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideAddTaskModal();
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9928044121eaee5a',t:'MTc2MTEyNTg1Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
