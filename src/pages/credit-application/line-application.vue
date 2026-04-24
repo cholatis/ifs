@@ -22,11 +22,11 @@ const {
   updateDocFiles 
 } = useCreditLineApplication()
 
-const businessTypeOptions = ['การผลิต', 'การค้า', 'บริการ', 'รับเหมา', 'อื่นๆ']
+const businessTypeOptions = ['Manufacturing', 'Trade', 'Services', 'Contractor', 'Others']
 const creditPeriodOptions = [30, 45, 60, 90, 120]
 const paymentTypeOptions = [
-  { title: 'เช็ค (Cheque)', value: 'cheque' },
-  { title: 'โอน (Transfer)', value: 'transfer' },
+  { title: 'Cheque', value: 'cheque' },
+  { title: 'Transfer', value: 'transfer' },
 ]
 
 const currentTab = ref('company')
@@ -64,7 +64,7 @@ const getDocGroupCount = (group: string) => {
       <VCol cols="12">
         <VCard color="primary" class="pa-4 d-flex align-center justify-space-between flex-wrap gap-4 elevation-2 header-card">
           <div class="d-flex align-center gap-2">
-            <h2 class="text-white mb-0">คำขอวงเงิน Factoring</h2>
+            <h2 class="text-white mb-0">Factoring Credit Line Application</h2>
             <VBadge
               color="white"
               :content="form.applicationId"
@@ -93,7 +93,7 @@ const getDocGroupCount = (group: string) => {
               @click="saveDraft"
               :loading="isSaving"
             >
-              บันทึก Draft
+              Save Draft
             </VBtn>
             <VBtn
               color="white"
@@ -102,7 +102,7 @@ const getDocGroupCount = (group: string) => {
               type="submit"
               :disabled="!isFormValid"
             >
-              ส่งคำขอ
+              Submit Application
             </VBtn>
           </div>
         </VCard>
@@ -110,14 +110,14 @@ const getDocGroupCount = (group: string) => {
 
       <!-- Section 1: Company Info -->
       <VCol cols="12">
-        <VCard title="Section 1 — ข้อมูลบริษัทและวงเงินที่ขอ" class="elevation-1">
+        <VCard title="Section 1 — Company Information & Requested Limit" class="elevation-1">
           <VCardText>
             <VRow>
               <VCol cols="12" md="6">
                 <VTextField
                   v-model="form.companyName"
-                  label="ชื่อบริษัท"
-                  placeholder="ระบุชื่อบริษัท"
+                  label="Company Name"
+                  placeholder="Enter company name"
                   readonly
                   class="bg-grey-lighten-4"
                   persistent-placeholder
@@ -126,7 +126,7 @@ const getDocGroupCount = (group: string) => {
               <VCol cols="12" md="6">
                 <VTextField
                   v-model="form.taxId"
-                  label="เลขประจำตัวผู้เสียภาษี"
+                  label="Tax ID"
                   placeholder="010XXXXXXXXXX"
                   readonly
                   class="bg-grey-lighten-4"
@@ -136,19 +136,19 @@ const getDocGroupCount = (group: string) => {
               <VCol cols="12" md="4">
                 <VSelect
                   v-model="form.businessType"
-                  label="ประเภทธุรกิจ"
+                  label="Business Type"
                   :items="businessTypeOptions"
                   :rules="[requiredValidator]"
-                  placeholder="เลือกประเภทธุรกิจ"
+                  placeholder="Select business type"
                   required
                 />
               </VCol>
               <VCol cols="12" md="4">
                 <VTextField
                   v-model.number="form.requestedCreditLimit"
-                  label="วงเงินที่ขอ (บาท)"
+                  label="Requested Credit Limit (THB)"
                   type="number"
-                  placeholder="เช่น 10,000,000"
+                  placeholder="e.g. 10,000,000"
                   :rules="[requiredValidator]"
                   required
                 />
@@ -156,10 +156,10 @@ const getDocGroupCount = (group: string) => {
               <VCol cols="12" md="4">
                 <VSelect
                   v-model="form.creditPeriod"
-                  label="ระยะเวลาเครดิต (วัน)"
+                  label="Credit Period (Days)"
                   :items="creditPeriodOptions"
                   :rules="[requiredValidator]"
-                  placeholder="เลือกระยะเวลา"
+                  placeholder="Select period"
                   required
                 />
               </VCol>
@@ -170,14 +170,14 @@ const getDocGroupCount = (group: string) => {
 
       <!-- Section 2: Billing & Payment -->
       <VCol cols="12">
-        <VCard title="Section 2 — เงื่อนไขการวางบิลและชำระเงิน" class="elevation-1">
+        <VCard title="Section 2 — Billing & Payment Terms" class="elevation-1">
           <VCardText>
             <VRow>
               <VCol cols="12" md="4">
                 <VTextField
                   v-model="form.billingSchedule"
-                  label="กำหนดการวางบิล"
-                  placeholder="เช่น ทุกวันที่ 25 ของเดือน"
+                  label="Billing Schedule"
+                  placeholder="e.g. 25th of every month"
                   :rules="[requiredValidator]"
                   required
                 />
@@ -185,8 +185,8 @@ const getDocGroupCount = (group: string) => {
               <VCol cols="12" md="4">
                 <VTextField
                   v-model="form.paymentDueDate"
-                  label="กำหนดการชำระเงิน"
-                  placeholder="เช่น 30 วันหลังวางบิล"
+                  label="Payment Due Date"
+                  placeholder="e.g. 30 days after billing"
                   :rules="[requiredValidator]"
                   required
                 />
@@ -194,26 +194,26 @@ const getDocGroupCount = (group: string) => {
               <VCol cols="12" md="4">
                 <VSelect
                   v-model="form.paymentType"
-                  label="ประเภทการชำระ"
+                  label="Payment Type"
                   :items="paymentTypeOptions"
                   :rules="[requiredValidator]"
-                  placeholder="เลือกประเภทการชำระ"
+                  placeholder="Select payment type"
                   required
                 />
               </VCol>
               <VCol cols="12" md="4">
                 <VTextField
                   v-model="form.billingLocation"
-                  label="สถานที่รับชำระ / เอกสารรับเช็ค"
-                  placeholder="ระบุสถานที่ (ถ้ามี)"
+                  label="Payment / Cheque Collection Location"
+                  placeholder="Enter location (if any)"
                 />
               </VCol>
               <VCol cols="12" md="8">
                 <VTextarea
                   v-model="form.billingRemark"
-                  label="ระเบียบวางบิล/ชำระเงิน (ถ้ามี)"
+                  label="Billing/Payment Rules (if any)"
                   rows="2"
-                  placeholder="รายละเอียดเพิ่มเติม..."
+                  placeholder="Additional details..."
                 />
               </VCol>
             </VRow>
@@ -223,19 +223,19 @@ const getDocGroupCount = (group: string) => {
 
       <!-- Section 3: Document Upload -->
       <VCol cols="12" class="mb-16">
-        <VCard title="Section 3 — Upload เอกสาร" class="elevation-1">
+        <VCard title="Section 3 — Document Upload" class="elevation-1">
           <VTabs v-model="currentTab" grow>
             <VTab value="company">
               <VIcon v-if="tabProgress.company.complete" start icon="tabler-circle-check" color="success" />
-              เอกสารบริษัท ({{ getDocGroupCount('company') }})
+              Company Documents ({{ getDocGroupCount('company') }})
             </VTab>
             <VTab value="financial">
               <VIcon v-if="tabProgress.financial.complete" start icon="tabler-circle-check" color="success" />
-              เอกสารการเงิน ({{ getDocGroupCount('financial') }})
+              Financial Documents ({{ getDocGroupCount('financial') }})
             </VTab>
             <VTab value="director">
               <VIcon v-if="tabProgress.director.complete" start icon="tabler-circle-check" color="success" />
-              เอกสารกรรมการ ({{ getDocGroupCount('director') }})
+              Director Documents ({{ getDocGroupCount('director') }})
             </VTab>
           </VTabs>
 
@@ -251,13 +251,13 @@ const getDocGroupCount = (group: string) => {
                     <VCol cols="12" sm="5">
                       <div class="d-flex align-center gap-2">
                         <span class="text-subtitle-2">{{ doc.docId }}. {{ doc.docName }}</span>
-                        <VChip v-if="doc.required" color="error" size="x-small">บังคับ</VChip>
-                        <VChip v-else color="secondary" size="x-small" variant="tonal">ไม่บังคับ</VChip>
+                        <VChip v-if="doc.required" color="error" size="x-small">Required</VChip>
+                        <VChip v-else color="secondary" size="x-small" variant="tonal">Optional</VChip>
                       </div>
                     </VCol>
                     <VCol cols="12" sm="5">
                       <VFileInput
-                        label="เลือกไฟล์ (PDF, Image)"
+                        label="Select File (PDF, Image)"
                         accept="application/pdf,image/*"
                         multiple
                         density="compact"
@@ -286,8 +286,8 @@ const getDocGroupCount = (group: string) => {
               <VTabsWindowItem value="financial">
                 <div class="doc-list pa-4">
                   <VAlert color="warning" variant="tonal" class="mb-4" icon="tabler-alert-triangle" border="start" density="compact">
-                    <div class="text-subtitle-2 font-weight-bold">หมายเหตุ (รายการที่ 9):</div>
-                    กรณียังไม่ปิดงบปี 66 ให้แนบ ภ.พ.30 ม.ค.–ธ.ค.66 แทน
+                    <div class="text-subtitle-2 font-weight-bold">Note (Item 9):</div>
+                    If 2023 financial statement is not yet closed, please attach P.P.30 (Jan-Dec 2023) instead.
                   </VAlert>
                   <VRow v-for="doc in form.documents.filter(d => d.docGroup === 'financial')" :key="doc.docId" 
                     class="doc-row align-center py-2 px-3 mb-2 rounded border"
@@ -296,12 +296,12 @@ const getDocGroupCount = (group: string) => {
                     <VCol cols="12" sm="5">
                       <div class="d-flex align-center gap-2">
                         <span class="text-subtitle-2">{{ doc.docId }}. {{ doc.docName }}</span>
-                        <VChip v-if="doc.required" color="error" size="x-small">บังคับ</VChip>
+                        <VChip v-if="doc.required" color="error" size="x-small">Required</VChip>
                       </div>
                     </VCol>
                     <VCol cols="12" sm="5">
                       <VFileInput
-                        label="เลือกไฟล์"
+                        label="Select File"
                         accept="application/pdf,image/*"
                         multiple
                         density="compact"
@@ -324,7 +324,7 @@ const getDocGroupCount = (group: string) => {
               <VTabsWindowItem value="director">
                 <div class="doc-list pa-4">
                   <VAlert color="info" variant="tonal" class="mb-4" icon="tabler-info-square-rounded" border="start" density="compact">
-                    ระเบียบ: เอกสารเครดิตบูโรต้องมีอายุไม่เกิน 1 เดือน
+                    Regulation: Credit Bureau documents must be no older than 1 month
                   </VAlert>
                   <VRow v-for="doc in form.documents.filter(d => d.docGroup === 'director')" :key="doc.docId" 
                     class="doc-row align-center py-2 px-3 mb-2 rounded border"
@@ -333,12 +333,12 @@ const getDocGroupCount = (group: string) => {
                     <VCol cols="12" sm="5">
                       <div class="d-flex align-center gap-2">
                         <span class="text-subtitle-2">{{ doc.docId }}. {{ doc.docName }}</span>
-                        <VChip v-if="doc.required" color="error" size="x-small">บังคับ</VChip>
+                        <VChip v-if="doc.required" color="error" size="x-small">Required</VChip>
                       </div>
                     </VCol>
                     <VCol cols="12" sm="5">
                       <VFileInput
-                        label="เลือกไฟล์"
+                        label="Select File"
                         accept="application/pdf,image/*"
                         multiple
                         density="compact"
@@ -367,9 +367,9 @@ const getDocGroupCount = (group: string) => {
       <div class="max-width-1200 mx-auto d-flex align-center justify-space-between gap-6 flex-wrap flex-md-nowrap">
         <div class="flex-grow-1">
           <div class="d-flex justify-space-between mb-1 align-center">
-            <span class="text-subtitle-1 font-weight-medium">ความคืบหน้าเอกสารบังคับ</span>
+            <span class="text-subtitle-1 font-weight-medium">Required Document Progress</span>
             <span class="text-primary font-weight-bold">
-              {{ uploadProgress.current }} จาก {{ uploadProgress.total }} รายการ ({{ uploadProgress.percentage }}%)
+              {{ uploadProgress.current }} of {{ uploadProgress.total }} items ({{ uploadProgress.percentage }}%)
             </span>
           </div>
           <VProgressLinear
@@ -389,7 +389,7 @@ const getDocGroupCount = (group: string) => {
             @click="saveDraft"
             :loading="isSaving"
           >
-            บันทึก Draft
+            Save Draft
           </VBtn>
           <VBtn
             color="primary"
@@ -399,7 +399,7 @@ const getDocGroupCount = (group: string) => {
             :disabled="!isFormValid"
             :loading="isSaving"
           >
-            ส่งคำขอวงเงิน
+            Submit Credit Application
           </VBtn>
         </div>
       </div>

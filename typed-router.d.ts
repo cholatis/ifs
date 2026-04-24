@@ -35,6 +35,7 @@ declare module 'vue-router/auto-routes' {
     'login': RouteRecordInfo<'login', '/login', Record<never, never>, Record<never, never>>,
     'logout': RouteRecordInfo<'logout', '/logout', Record<never, never>, Record<never, never>>,
     'main': RouteRecordInfo<'main', '/main', Record<never, never>, Record<never, never>>,
+    'po-list': RouteRecordInfo<'po-list', '/po-list', Record<never, never>, Record<never, never>>,
     'register': RouteRecordInfo<'register', '/register', Record<never, never>, Record<never, never>>,
     'registration-management-list': RouteRecordInfo<'registration-management-list', '/registration-management/list', Record<never, never>, Record<never, never>>,
     'registration-management-view-id': RouteRecordInfo<'registration-management-view-id', '/registration-management/view/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,

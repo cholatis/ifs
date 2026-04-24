@@ -44,7 +44,7 @@ export const useCreditLineApplication = () => {
   const form = ref<CreditLineApplication>({
     applicationId: 'CAAPP' + Math.floor(Math.random() * 90000 + 10000),
     companyId: 'CUST' + Math.floor(Math.random() * 90000 + 10000),
-    companyName: 'บริษัท ทดสอบ จำกัด', // Mocked from profile
+    companyName: 'Mock Test Company Ltd.', // Mocked from profile
     taxId: '0105562012345',         // Mocked from profile
     businessType: '',
     requestedCreditLimit: null,
@@ -60,22 +60,22 @@ export const useCreditLineApplication = () => {
     documents: [
       // Tab 1: Company Documents
       { docId: 1, docGroup: 'company', docName: 'Company Profile', required: true, files: [], uploadStatus: 'pending', remark: '' },
-      { docId: 2, docGroup: 'company', docName: 'ประวัติเจ้าของ / ผู้บริหารหลัก', required: true, files: [], uploadStatus: 'pending', remark: '' },
-      { docId: 3, docGroup: 'company', docName: 'หนังสือรับรองบริษัท อายุไม่เกิน 1 เดือน', required: true, files: [], uploadStatus: 'pending', remark: '' },
-      { docId: 4, docGroup: 'company', docName: 'บริคณธ์สนธิ', required: true, files: [], uploadStatus: 'pending', remark: '' },
-      { docId: 5, docGroup: 'company', docName: 'สำเนารายชื่อผู้ถือหุ้น ล่าสุด', required: true, files: [], uploadStatus: 'pending', remark: '' },
-      { docId: 6, docGroup: 'company', docName: 'หนังสือแสดงการจดทะเบียนหุ้นส่วนบริษัท', required: true, files: [], uploadStatus: 'pending', remark: '' },
-      { docId: 7, docGroup: 'company', docName: 'ภ.พ.20', required: true, files: [], uploadStatus: 'pending', remark: '' },
-      { docId: 8, docGroup: 'company', docName: 'บอจ.3 / ใบอนุญาตจัดตั้งโรงงาน', required: false, files: [], uploadStatus: 'pending', remark: '' },
+      { docId: 2, docGroup: 'company', docName: 'Owner / Key Executives Profile', required: true, files: [], uploadStatus: 'pending', remark: '' },
+      { docId: 3, docGroup: 'company', docName: 'Company Certificate (max 1 month old)', required: true, files: [], uploadStatus: 'pending', remark: '' },
+      { docId: 4, docGroup: 'company', docName: 'Memorandum of Association', required: true, files: [], uploadStatus: 'pending', remark: '' },
+      { docId: 5, docGroup: 'company', docName: 'Latest List of Shareholders', required: true, files: [], uploadStatus: 'pending', remark: '' },
+      { docId: 6, docGroup: 'company', docName: 'Partnership Registration Certificate', required: true, files: [], uploadStatus: 'pending', remark: '' },
+      { docId: 7, docGroup: 'company', docName: 'P.P.20 (VAT Registration)', required: true, files: [], uploadStatus: 'pending', remark: '' },
+      { docId: 8, docGroup: 'company', docName: 'Bor.Or.Chor.3 / Factory License', required: false, files: [], uploadStatus: 'pending', remark: '' },
       
       // Tab 2: Financial Documents
-      { docId: 9, docGroup: 'financial', docName: 'ภ.พ.30 ย้อนหลัง ม.ค. ปัจจุบัน พร้อมใบเสร็จ', required: true, files: [], uploadStatus: 'pending', remark: '' },
-      { docId: 10, docGroup: 'financial', docName: 'งบการเงินย้อนหลัง 3 ปี ล่าสุด', required: true, files: [], uploadStatus: 'pending', remark: '' },
-      { docId: 11, docGroup: 'financial', docName: 'Statement ธนาคารย้อนหลัง 1 ปี', required: true, files: [], uploadStatus: 'pending', remark: '' },
+      { docId: 9, docGroup: 'financial', docName: 'P.P.30 (VAT Return) with receipts', required: true, files: [], uploadStatus: 'pending', remark: '' },
+      { docId: 10, docGroup: 'financial', docName: 'Financial Statements (Last 3 Years)', required: true, files: [], uploadStatus: 'pending', remark: '' },
+      { docId: 11, docGroup: 'financial', docName: 'Bank Statements (Last 12 Months)', required: true, files: [], uploadStatus: 'pending', remark: '' },
       
       // Tab 3: Director Documents
-      { docId: 12, docGroup: 'director', docName: 'สำเนาบัตรประชาชน + ทะเบียนบ้านกรรมการและคู่สมรส', required: true, files: [], uploadStatus: 'pending', remark: '' },
-      { docId: 13, docGroup: 'director', docName: 'เอกสารเครดิตบูโร (บริษัท + กรรมการ + ผู้ค้ำประกัน)', required: true, files: [], uploadStatus: 'pending', remark: '' },
+      { docId: 12, docGroup: 'director', docName: 'Copies of ID & House Reg. (Directors & Spouses)', required: true, files: [], uploadStatus: 'pending', remark: '' },
+      { docId: 13, docGroup: 'director', docName: 'Credit Bureau Reports (Company/Directors/Guarantors)', required: true, files: [], uploadStatus: 'pending', remark: '' },
     ]
   })
 

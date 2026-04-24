@@ -23,6 +23,9 @@ const {
   updateDocFiles,
 } = useFactoringRequest()
 
+const item1Included = ref(true)
+const item2Included = ref(true)
+
 const formatCurrency = (value: number | null) => {
   if (value === null) return '0'
   return new Intl.NumberFormat('th-TH').format(value)
@@ -57,7 +60,7 @@ const onSubmit = async () => {
       <VCol cols="12">
         <VCard color="primary" class="pa-4 d-flex align-center justify-space-between flex-wrap gap-4 elevation-2 header-card">
           <div class="d-flex align-center gap-2">
-            <h2 class="text-white mb-0">คำขอ Factoring ตามใบ PO</h2>
+            <h2 class="text-white mb-0">Factoring Request (PO-based)</h2>
             <VBadge
               color="white"
               :content="form.requestId"
@@ -86,7 +89,7 @@ const onSubmit = async () => {
               @click="saveDraft"
               :loading="isSaving"
             >
-              บันทึก Draft
+              Save Draft
             </VBtn>
             <VBtn
               color="white"
@@ -95,7 +98,7 @@ const onSubmit = async () => {
               type="submit"
               :disabled="!isFormValid"
             >
-              ส่งคำขอ
+              Submit Application
             </VBtn>
           </div>
         </VCard>
@@ -108,7 +111,7 @@ const onSubmit = async () => {
             <template #title>
               <div class="d-flex align-center gap-2">
                 <VIcon icon="tabler-chart-pie" color="primary" />
-                <span>Section 1 — วงเงินที่ได้รับอนุมัติ (อ้างอิง: {{ form.creditApplicationId }})</span>
+                <span>Section 1 — Approved Credit Limit (Ref: {{ form.creditApplicationId }})</span>
               </div>
             </template>
           </VCardItem>
@@ -117,28 +120,28 @@ const onSubmit = async () => {
             <VRow align="center">
               <VCol cols="12" md="4" class="d-flex flex-column gap-2">
                 <div class="d-flex align-center justify-space-between">
-                  <span class="text-subtitle-2">วงเงินทั้งหมด</span>
+                  <span class="text-subtitle-2">Total Credit Limit</span>
                   <VChip color="primary" variant="flat" class="font-weight-bold">
-                    {{ formatCurrency(form.approvedCreditLimit) }} บาท
+                    {{ formatCurrency(form.approvedCreditLimit) }} THB
                   </VChip>
                 </div>
                 <div class="d-flex align-center justify-space-between">
-                  <span class="text-subtitle-2">ใช้ไปแล้ว</span>
+                  <span class="text-subtitle-2">Already Used</span>
                   <VChip color="warning" variant="flat" class="font-weight-bold">
-                    {{ formatCurrency(form.usedCreditAmount) }} บาท
+                    {{ formatCurrency(form.usedCreditAmount) }} THB
                   </VChip>
                 </div>
                 <div class="d-flex align-center justify-space-between">
-                  <span class="text-subtitle-2">คงเหลือ</span>
+                  <span class="text-subtitle-2">Remaining</span>
                   <VChip color="success" variant="flat" class="font-weight-bold">
-                    {{ formatCurrency(form.availableCreditAmount) }} บาท
+                    {{ formatCurrency(form.availableCreditAmount) }} THB
                   </VChip>
                 </div>
               </VCol>
 
               <VCol cols="12" md="8">
                 <div class="d-flex justify-space-between mb-2">
-                  <span class="text-caption font-weight-medium">อัตราการใช้วงเงิน</span>
+                  <span class="text-caption font-weight-medium">Credit Usage Rate</span>
                   <span class="text-caption font-weight-bold text-primary">{{ Math.round(creditUsagePercentage) }}%</span>
                 </div>
                 <VProgressLinear
@@ -150,7 +153,7 @@ const onSubmit = async () => {
                 />
                 <div class="mt-4 d-flex align-center gap-2 text-info">
                   <VIcon icon="tabler-info-circle" size="18" />
-                  <span class="text-caption italic">วงเงินคงเหลือหลังรายการนี้: {{ formatCurrency(remainingAfterRequest) }} บาท</span>
+                  <span class="text-caption italic">Remaining limit after this request: {{ formatCurrency(remainingAfterRequest) }} THB</span>
                 </div>
               </VCol>
             </VRow>
@@ -160,14 +163,14 @@ const onSubmit = async () => {
 
       <!-- Section 2: PO Information -->
       <VCol cols="12" md="6">
-        <VCard title="Section 2 — ข้อมูล PO" class="elevation-1 h-100">
+        <VCard title="Section 2 — PO Information" class="elevation-1 h-100">
           <VCardText>
             <VRow>
               <VCol cols="12">
                 <VTextField
                   v-model="form.poNumber"
-                  label="เลขที่ PO"
-                  placeholder="ระบุเลขที่ PO"
+                  label="PO Number"
+                  placeholder="Enter PO number"
                   :rules="[requiredValidator]"
                   required
                 />
@@ -175,7 +178,7 @@ const onSubmit = async () => {
               <VCol cols="12" sm="6">
                 <VTextField
                   v-model="form.poDate"
-                  label="วันที่ PO"
+                  label="PO Date"
                   type="date"
                   :rules="[requiredValidator]"
                   required
@@ -184,7 +187,7 @@ const onSubmit = async () => {
               <VCol cols="12" sm="6">
                 <VTextField
                   v-model.number="form.poAmount"
-                  label="มูลค่า PO (บาท)"
+                  label="PO Amount (THB)"
                   type="number"
                   placeholder="0.00"
                   :rules="[requiredValidator]"
@@ -194,8 +197,8 @@ const onSubmit = async () => {
               <VCol cols="12">
                 <VTextField
                   v-model="form.buyerName"
-                  label="ชื่อ Buyer"
-                  placeholder="ระบุชื่อบริษัทผู้ซื้อ"
+                  label="Buyer Name"
+                  placeholder="Enter buyer company name"
                   :rules="[requiredValidator]"
                   required
                 />
@@ -203,8 +206,8 @@ const onSubmit = async () => {
               <VCol cols="12">
                 <VTextField
                   v-model="form.buyerTaxId"
-                  label="เลขประจำตัวผู้เสียภาษี Buyer"
-                  placeholder="เลข 13 หลัก"
+                  label="Buyer Tax ID"
+                  placeholder="13 digits"
                   :rules="[requiredValidator, lengthValidator(form.buyerTaxId, 13)]"
                   required
                 />
@@ -216,14 +219,14 @@ const onSubmit = async () => {
 
       <!-- Section 3: Invoice Information -->
       <VCol cols="12" md="6">
-        <VCard title="Section 3 — ข้อมูล Invoice" class="elevation-1 h-100">
+        <VCard title="Section 3 — Invoice Information" class="elevation-1 h-100">
           <VCardText>
             <VRow>
               <VCol cols="12">
                 <VTextField
                   v-model="form.invoiceNumber"
-                  label="เลขที่ Invoice"
-                  placeholder="ระบุเลขที่ Invoice"
+                  label="Invoice Number"
+                  placeholder="Enter invoice number"
                   :rules="[requiredValidator]"
                   required
                 />
@@ -231,7 +234,7 @@ const onSubmit = async () => {
               <VCol cols="6">
                 <VTextField
                   v-model="form.invoiceDate"
-                  label="วันที่ Invoice"
+                  label="Invoice Date"
                   type="date"
                   :rules="[requiredValidator]"
                   required
@@ -240,7 +243,7 @@ const onSubmit = async () => {
               <VCol cols="6">
                 <VTextField
                   v-model="form.invoiceDueDate"
-                  label="วันครบกำหนดชำระ"
+                  label="Due Date"
                   type="date"
                   :rules="[requiredValidator]"
                   required
@@ -249,7 +252,7 @@ const onSubmit = async () => {
               <VCol cols="12">
                 <VTextField
                   v-model.number="form.requestedAmount"
-                  label="วงเงินที่ขอ (บาท)"
+                  label="Requested Amount (THB)"
                   type="number"
                   placeholder="0.00"
                   :rules="[requiredValidator]"
@@ -267,7 +270,7 @@ const onSubmit = async () => {
                   density="compact"
                 >
                   <span class="text-caption font-weight-bold">
-                    วงเงินที่ขอเกินวงเงินคงเหลือ กรุณาตรวจสอบ
+                    Requested amount exceeds remaining limit. Please check.
                   </span>
                 </VAlert>
               </VCol>
@@ -276,32 +279,45 @@ const onSubmit = async () => {
         </VCard>
       </VCol>
 
-      <!-- Section 4: Attachments -->
+      <!-- Section 4: PO List -->
       <VCol cols="12">
-        <VCard title="Section 4 — แนบเอกสาร" class="elevation-1">
+        <VCard title="Section 4 — PO List" class="elevation-1">
           <VCardText>
-            <VRow>
-              <VCol v-for="doc in form.documents" :key="doc.docId" cols="12" md="6">
-                <div class="px-3 py-2 border rounded mb-2" :class="{ 'uploaded-doc': doc.uploadStatus === 'uploaded' }">
-                  <div class="d-flex align-center justify-space-between mb-1">
-                    <span class="text-subtitle-2 font-weight-medium">
-                      {{ doc.docName }}
-                      <span v-if="doc.required" class="text-error ml-1">*</span>
-                    </span>
-                    <VIcon v-if="doc.uploadStatus === 'uploaded'" icon="tabler-circle-check" color="success" size="18" />
-                  </div>
-                  <VFileInput
-                    label="เลือกไฟล์ (PDF, Image)"
-                    accept="application/pdf,image/*"
-                    density="compact"
-                    prepend-icon="tabler-paperclip"
-                    hide-details
-                    class="bg-surface"
-                    @update:model-value="(files) => updateDocFiles(doc.docId, files as File[])"
-                  />
-                </div>
-              </VCol>
-            </VRow>
+            <VTable class="border rounded">
+              <thead>
+                <tr>
+                  <th class="text-left font-weight-bold">PO Number</th>
+                  <th class="text-left font-weight-bold">PO Date</th>
+                  <th class="text-right font-weight-bold">Amount (THB)</th>
+                  <th class="text-center font-weight-bold">Status</th>
+                  <th class="text-center font-weight-bold">Include in Factoring</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>PO-2026-001</td>
+                  <td>20/04/2026</td>
+                  <td class="text-right">50,000.00</td>
+                  <td class="text-center">
+                    <VChip color="success" size="x-small" variant="flat">Invoiced</VChip>
+                  </td>
+                  <td class="text-center">
+                    <VCheckbox v-model="item1Included" density="compact" hide-details />
+                  </td>
+                </tr>
+                <tr>
+                  <td>PO-2026-002</td>
+                  <td>22/04/2026</td>
+                  <td class="text-right">75,500.00</td>
+                  <td class="text-center">
+                    <VChip color="success" size="x-small" variant="flat">Invoiced</VChip>
+                  </td>
+                  <td class="text-center">
+                    <VCheckbox v-model="item2Included" density="compact" hide-details />
+                  </td>
+                </tr>
+              </tbody>
+            </VTable>
           </VCardText>
         </VCard>
       </VCol>

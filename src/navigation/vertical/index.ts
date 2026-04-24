@@ -25,6 +25,10 @@ export default [
         title: 'Request List',
         to: { name: 'credit-application-list' },
       },
+      {
+        title: 'PO List',
+        to: { name: 'po-list' },
+      },
     ],
   },
   {

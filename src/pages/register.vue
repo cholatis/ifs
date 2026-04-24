@@ -25,7 +25,7 @@ const registrationForm = ref({
   acceptTerms: false,
 })
 
-const businessTypeOptions = ['การผลิต', 'การค้า', 'บริการ', 'รับเหมา', 'อื่นๆ']
+const businessTypeOptions = ['Manufacturing', 'Trade', 'Services', 'Contractor', 'Others']
 
 const currentStep = ref(0)
 const isSubmitting = ref(false)
@@ -34,9 +34,9 @@ const refStep2Form = ref()
 const registrationError = ref('')
 
 const steps = [
-  { title: 'ข้อมูลบริษัท', icon: 'tabler-building' },
-  { title: 'ข้อมูลผู้ติดต่อ & Email', icon: 'tabler-user' },
-  { title: 'ยืนยันและส่งคำขอ', icon: 'tabler-check' },
+  { title: 'Company Information', icon: 'tabler-building' },
+  { title: 'Contact Info & Email', icon: 'tabler-user' },
+  { title: 'Confirm & Submit', icon: 'tabler-check' },
 ]
 
 const validateStep1 = async () => {
@@ -98,10 +98,10 @@ const onSubmit = async () => {
           </h1>
         </div>
         <h4 class="text-h4 mb-1">
-          สร้างบัญชี Factoring
+          Create Factoring Account
         </h4>
         <p class="mb-0">
-          กรอกข้อมูลเพื่อเริ่มต้นการขอวงเงินของบริษัทคุณ
+          Fill in the details to start your company's credit line request.
         </p>
       </VCardText>
 
@@ -111,6 +111,7 @@ const onSubmit = async () => {
           :items="steps"
           direction="horizontal"
           align="center"
+          icon-size="44"
           class="mb-8 custom-stepper-header"
         />
 
@@ -128,15 +129,15 @@ const onSubmit = async () => {
                 <VCol cols="12">
                   <AppTextField
                     v-model="registrationForm.companyName"
-                    label="ชื่อบริษัท"
-                    placeholder="ระบุชื่อบริษัทเต็ม"
+                    label="Company Name"
+                    placeholder="Enter full company name"
                     :rules="[requiredValidator]"
                   />
                 </VCol>
                 <VCol cols="12">
                   <AppTextField
                     v-model="registrationForm.taxId"
-                    label="เลขประจำตัวผู้เสียภาษี"
+                    label="Tax ID"
                     placeholder="01055XXXXXXXX"
                     :rules="[requiredValidator, (v) => lengthValidator(v, 13) || 'Tax ID must be 13 digits', integerValidator]"
                   />
@@ -144,26 +145,26 @@ const onSubmit = async () => {
                 <VCol cols="12">
                   <AppSelect
                     v-model="registrationForm.businessType"
-                    label="ประเภทธุรกิจ"
+                    label="Business Type"
                     :items="businessTypeOptions"
-                    placeholder="เลือกประเภทธุรกิจ"
+                    placeholder="Select business type"
                     :rules="[requiredValidator]"
                   />
                 </VCol>
                 <VCol cols="12">
                   <AppTextField
                     v-model="registrationForm.requestedAmount"
-                    label="วงเงินที่ต้องการ (บาท)"
+                    label="Requested Amount (THB)"
                     type="number"
-                    placeholder="เช่น 1,000,000"
+                    placeholder="e.g. 1,000,000"
                     :rules="[requiredValidator]"
                   />
                 </VCol>
                 <VCol cols="12">
                   <AppTextField
                     v-model="registrationForm.buyer"
-                    label="Buyer / ลูกค้าหลักของบริษัท"
-                    placeholder="ระบุชื่อบริษัทลูกค้าหลัก"
+                    label="Buyer / Main Customers"
+                    placeholder="Enter main buyer company name"
                     :rules="[requiredValidator]"
                   />
                 </VCol>
@@ -172,7 +173,7 @@ const onSubmit = async () => {
                     block
                     @click="validateStep1"
                   >
-                    ถัดไป
+                    Next
                     <VIcon
                       end
                       icon="tabler-arrow-right"
@@ -193,15 +194,15 @@ const onSubmit = async () => {
                 <VCol cols="12">
                   <AppTextField
                     v-model="registrationForm.contactName"
-                    label="ชื่อ-นามสกุลผู้ติดต่อ"
-                    placeholder="ระบุชื่อ-นามสกุล"
+                    label="Contact Name"
+                    placeholder="Enter full name"
                     :rules="[requiredValidator]"
                   />
                 </VCol>
                 <VCol cols="12">
                   <AppTextField
                     v-model="registrationForm.phone"
-                    label="เบอร์โทรศัพท์"
+                    label="Phone Number"
                     placeholder="08XXXXXXXX"
                     :rules="[requiredValidator, (v) => lengthValidator(v, 10) || 'Phone must be 10 digits', integerValidator]"
                   />
@@ -219,7 +220,7 @@ const onSubmit = async () => {
                     closable
                     class="mt-2 text-caption"
                   >
-                    ระบบจะส่ง One-Time Password (OTP) ไปยัง email นี้ เพื่อใช้ในการเข้าสู่ระบบครั้งแรก
+                    The system will send a One-Time Password (OTP) to this email for your first login.
                   </VAlert>
                 </VCol>
                 <VCol
@@ -232,13 +233,13 @@ const onSubmit = async () => {
                     class="flex-grow-1"
                     @click="currentStep--"
                   >
-                    ย้อนกลับ
+                    Back
                   </VBtn>
                   <VBtn
                     class="flex-grow-1"
                     @click="validateStep2"
                   >
-                    ถัดไป
+                    Next
                   </VBtn>
                 </VCol>
               </VRow>
@@ -253,12 +254,12 @@ const onSubmit = async () => {
                   variant="outlined"
                   class="pa-4 bg-surface"
                 >
-                  <h6 class="text-h6 mb-3">สรุปข้อมูลการลงทะเบียน</h6>
-                  <div class="text-body-2 mb-1"><span class="font-weight-bold">บริษัท:</span> {{ registrationForm.companyName }}</div>
+                  <h6 class="text-h6 mb-3">Registration Summary</h6>
+                  <div class="text-body-2 mb-1"><span class="font-weight-bold">Company:</span> {{ registrationForm.companyName }}</div>
                   <div class="text-body-2 mb-1"><span class="font-weight-bold">Tax ID:</span> {{ registrationForm.taxId }}</div>
-                  <div class="text-body-2 mb-1"><span class="font-weight-bold">วงเงินที่ขอ:</span> {{ Number(registrationForm.requestedAmount).toLocaleString() }} บาท</div>
+                  <div class="text-body-2 mb-1"><span class="font-weight-bold">Requested Amount:</span> {{ Number(registrationForm.requestedAmount).toLocaleString() }} THB</div>
                   <VDivider class="my-3" />
-                  <div class="text-body-2 mb-1"><span class="font-weight-bold">ผู้ติดต่อ:</span> {{ registrationForm.contactName }}</div>
+                  <div class="text-body-2 mb-1"><span class="font-weight-bold">Contact:</span> {{ registrationForm.contactName }}</div>
                   <div class="text-body-2 mb-1"><span class="font-weight-bold">Email:</span> {{ registrationForm.email }}</div>
                 </VCard>
 
@@ -269,10 +270,10 @@ const onSubmit = async () => {
                   closable
                   class="mt-4"
                 >
-                  <div class="font-weight-bold mb-1">เกิดข้อผิดพลาดในการลงทะเบียน:</div>
+                  <div class="font-weight-bold mb-1">An error occurred during registration:</div>
                   <div class="text-caption">{{ registrationError }}</div>
                   <div class="text-caption mt-2" v-if="registrationError.includes('SMTP') || registrationError.includes('500')">
-                    <strong>ข้อแนะนำ:</strong> กรุณาตรวจสอบว่าได้ตั้งค่า SMTP Secrets ใน Supabase เรียบร้อยแล้ว (SMTP_USER, SMTP_PASS, APP_URL)
+                    <strong>Suggestion:</strong> Please check that SMTP Secrets are configured in Supabase (SMTP_USER, SMTP_PASS, APP_URL).
                   </div>
                 </VAlert>
               </VCol>
@@ -280,7 +281,7 @@ const onSubmit = async () => {
               <VCol cols="12">
                 <VCheckbox
                   v-model="registrationForm.acceptTerms"
-                  label="ฉันยอมรับเงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัว"
+                  label="I accept the terms of use and privacy policy."
                   :rules="[requiredValidator]"
                 />
               </VCol>
@@ -295,7 +296,7 @@ const onSubmit = async () => {
                   class="flex-grow-1"
                   @click="currentStep--"
                 >
-                  ย้อนกลับ
+                  Back
                 </VBtn>
                 <VBtn
                   class="flex-grow-1"
@@ -303,7 +304,7 @@ const onSubmit = async () => {
                   :disabled="!registrationForm.acceptTerms || isSubmitting"
                   @click="onSubmit"
                 >
-                  ส่งคำขอ
+                  Submit Request
                   <VIcon
                     end
                     icon="tabler-send"
@@ -313,7 +314,7 @@ const onSubmit = async () => {
 
               <VCol cols="12" class="text-center">
                 <router-link to="/login" class="text-primary text-body-1">
-                  มีบัญชีแล้ว? เข้าสู่ระบบ
+                  Already have an account? Login
                 </router-link>
               </VCol>
             </VRow>
@@ -336,6 +337,23 @@ const onSubmit = async () => {
   .v-avatar.bg-primary {
     background-color: rgb(var(--v-theme-primary)) !important;
     color: #fff !important;
+  }
+
+  // Reduce item width and padding to fit 680px card
+  .step-wrapper {
+    padding: 0.75rem 0.5rem !important;
+    min-inline-size: 8rem !important;
+  }
+
+  // Reduce chevron margins
+  .stepper-chevron-indicator {
+    margin-inline: 0.5rem !important;
+  }
+
+  // Hide the slide group arrows
+  .v-slide-group__prev,
+  .v-slide-group__next {
+    display: none !important;
   }
 }
 

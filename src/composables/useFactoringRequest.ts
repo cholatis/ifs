@@ -56,10 +56,10 @@ export const useFactoringRequest = () => {
     requestedAmount: null,
     status: 'draft',
     documents: [
-      { docId: 1, docName: 'สำเนา PO', required: true, file: null, uploadStatus: 'pending' },
-      { docId: 2, docName: 'Invoice / ใบแจ้งหนี้', required: true, file: null, uploadStatus: 'pending' },
-      { docId: 3, docName: 'ใบส่งของ / Delivery Order', required: false, file: null, uploadStatus: 'pending' },
-      { docId: 4, docName: 'เอกสารอื่นๆ ที่เกี่ยวข้อง', required: false, file: null, uploadStatus: 'pending' },
+      { docId: 1, docName: 'PO Copy', required: true, file: null, uploadStatus: 'pending' },
+      { docId: 2, docName: 'Invoice', required: true, file: null, uploadStatus: 'pending' },
+      { docId: 3, docName: 'Delivery Order', required: false, file: null, uploadStatus: 'pending' },
+      { docId: 4, docName: 'Other related documents', required: false, file: null, uploadStatus: 'pending' },
     ],
   })
 
